@@ -1,0 +1,41 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: travel-postgres
+    environment:
+      POSTGRES_DB: travel
+      POSTGRES_USER: travel
+      POSTGRES_PASSWORD: travel
+    ports:
+      - "5433:5432"
+    volumes:
+      - travel_pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: travel-redis
+    ports:
+      - "6379:6379"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: travel-app
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/travel
+      SPRING_DATASOURCE_USERNAME: travel
+      SPRING_DATASOURCE_PASSWORD: travel
+
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+volumes:
+  travel_pgdata:
